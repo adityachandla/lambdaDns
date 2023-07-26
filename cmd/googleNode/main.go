@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strings"
 
 	"github.com/adityachandla/lambdaDns/utils"
@@ -17,8 +18,9 @@ func getRedirectResponse(url, remaining string) *utils.Response {
 }
 
 func processRequest(req *utils.UrlRequest) utils.Response {
+	log.Printf("Processing %s at googleNode", req.Url)
 	parts := strings.Split(req.Url, ".")
-	if len(parts) == 2 {
+	if len(parts) == 1 {
 		return utils.Response{Status: utils.FETCHED, NodeId: nodeId}
 	}
 	return utils.Response{Status: utils.FAILED, NodeId: nodeId}
@@ -28,7 +30,7 @@ func HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	var urlRequest utils.UrlRequest
 	json.Unmarshal([]byte(request.Body), &urlRequest)
 	responseBody := processRequest(&urlRequest)
-	marshaledBody, err := json.Marshal(responseBody)
+	marshaledBody, err := json.Marshal(&responseBody)
 	utils.Check(err)
 	return events.APIGatewayProxyResponse{Body: string(marshaledBody), StatusCode: 200}, nil
 }

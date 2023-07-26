@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/adityachandla/lambdaDns/utils"
@@ -25,6 +26,7 @@ func processRequest(req *utils.UrlRequest) utils.Response {
 	if strings.Index(req.Url, "www.") != -1 {
 		req.Url = strings.TrimPrefix(req.Url, "www.")
 	}
+	log.Printf("Processing %s at topLevelNode", req.Url)
 	parts := strings.Split(req.Url, ".")
 	lastPart := parts[len(parts)-1]
 	remaining := strings.Join(parts[:len(parts)-1], ".")
@@ -42,7 +44,7 @@ func HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	var urlRequest utils.UrlRequest
 	json.Unmarshal([]byte(request.Body), &urlRequest)
 	responseBody := processRequest(&urlRequest)
-	marshaledBody, err := json.Marshal(responseBody)
+	marshaledBody, err := json.Marshal(&responseBody)
 	utils.Check(err)
 	return events.APIGatewayProxyResponse{Body: string(marshaledBody), StatusCode: 200}, nil
 }
