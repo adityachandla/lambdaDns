@@ -16,7 +16,7 @@ const nodeId = 22
 func processRequest(req *utils.UrlRequest) utils.Response {
 	log.Printf("Processing %s at facebookNode", req.Url)
 	parts := strings.Split(req.Url, ".")
-	if len(parts) == 2 {
+	if len(parts) == 1 {
 		return utils.Response{Status: utils.FETCHED, NodeId: nodeId}
 	}
 	return utils.Response{Status: utils.FAILED, NodeId: nodeId}

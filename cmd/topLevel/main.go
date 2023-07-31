@@ -26,6 +26,9 @@ func processRequest(req *utils.UrlRequest) utils.Response {
 	if strings.Index(req.Url, "www.") != -1 {
 		req.Url = strings.TrimPrefix(req.Url, "www.")
 	}
+	if strings.Index(req.Url, "/") != -1 {
+		req.Url = req.Url[:strings.Index(req.Url, "/")]
+	}
 	log.Printf("Processing %s at topLevelNode", req.Url)
 	parts := strings.Split(req.Url, ".")
 	lastPart := parts[len(parts)-1]
@@ -46,7 +49,13 @@ func HandleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	responseBody := processRequest(&urlRequest)
 	marshaledBody, err := json.Marshal(&responseBody)
 	utils.Check(err)
-	return events.APIGatewayProxyResponse{Body: string(marshaledBody), StatusCode: 200}, nil
+	return events.APIGatewayProxyResponse{
+		Body: string(marshaledBody),
+		Headers: map[string]string{
+			"Content-Type":                "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+		StatusCode: 200}, nil
 }
 
 func main() {
